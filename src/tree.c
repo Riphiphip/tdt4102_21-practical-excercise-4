@@ -63,18 +63,16 @@ void simplify_tree(node_t **simplified, node_t *root)
     {
         if (node.children[i] != NULL && node.children[i])
         {
-            printf("%s\n", node_string[node.children[i]->type]);
             simplify_tree(&node.children[i], node.children[i]);
         }
     }
 
     // Remove purely syntactic nodes
-    if (root->type == NULL_STATEMENT ||
-        (root->data == NULL &&
-         root->n_children == 1 &&
-         root->type != DECLARATION &&
-         root->type != PRINT_STATEMENT &&
-         root->type != RETURN_STATEMENT))
+    if (root->data == NULL &&
+        root->n_children == 1 &&
+        root->type != DECLARATION &&
+        root->type != PRINT_STATEMENT &&
+        root->type != RETURN_STATEMENT)
     {
         *simplified = root->children[0];
         node_finalize(root);
