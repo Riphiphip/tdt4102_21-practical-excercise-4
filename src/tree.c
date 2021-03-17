@@ -89,6 +89,46 @@ void flatten_child(node_t *node, int n)
     node_finalize(child);
 }
 
+long apply_unary(char op, long param)
+{
+    switch (op)
+    {
+    case '-':
+        return -param;
+    case '~':
+        return ~param;
+    default:
+        perror("Invalid unary operator");
+    }
+}
+
+long apply_binary(char op, long param1, long param2)
+{
+    switch (op)
+    {
+    case '+':
+        return param1 + param2;
+    case '-':
+        return param1 - param2;
+    case '*':
+        return param1 * param2;
+    case '/':
+        return param1 / param2;
+    case '<':
+        return param1 << param2;
+    case '>':
+        return param1 >> param2;
+    case '|':
+        return param1 | param2;
+    case '&':
+        return param1 & param2;
+    case '^':
+        return param1 ^ param2;
+    default:
+        perror("Invalid binary operator");
+    }
+}
+
 void simplify_tree(node_t **simplified, node_t *root)
 {
     // Depth first recursion
@@ -139,7 +179,6 @@ void simplify_tree(node_t **simplified, node_t *root)
         flatten_child(root, 0);
     }
 
-
     if (root->type == EXPRESSION)
     {
         bool is_constant = true;
@@ -154,59 +193,16 @@ void simplify_tree(node_t **simplified, node_t *root)
         if (is_constant)
         {
             long number_value;
-            bool is_unary = true;
-
             long param1 = *((long *)root->children[0]->data);
             long param2;
             if (root->n_children > 1)
             {
-                is_unary = false;
                 param2 = *((long *)root->children[1]->data);
+                number_value = apply_binary(((char *)root->data)[0], param1, param2);
             }
-
-            if (!strcmp(root->data, "+"))
+            else
             {
-                number_value = param1 + param2;
-            }
-            else if (!strcmp(root->data, "-") && is_unary)
-            {
-                number_value = -param1;
-            }
-            else if (!strcmp(root->data, "-"))
-            {
-                number_value = param1 - param2;
-            }
-            else if (!strcmp(root->data, "*"))
-            {
-                number_value = param1 * param2;
-            }
-            else if (!strcmp(root->data, "/"))
-            {
-                number_value = param1 / param2;
-            }
-            else if (!strcmp(root->data, "|"))
-            {
-                number_value = param1 | param2;
-            }
-            else if (!strcmp(root->data, "^"))
-            {
-                number_value = param1 ^ param2;
-            }
-            else if (!strcmp(root->data, "&"))
-            {
-                number_value = param1 & param2;
-            }
-            else if (!strcmp(root->data, "<<"))
-            {
-                number_value = param1 << param2;
-            }
-            else if (!strcmp(root->data, ">>"))
-            {
-                number_value = param1 >> param2;
-            }
-            else if (!strcmp(root->data, "~"))
-            {
-                number_value = ~param1;
+                number_value = apply_unary(((char *)root->data)[0], param1);
             }
             destroy_subtree(root);
             root = malloc(sizeof(node_t));
