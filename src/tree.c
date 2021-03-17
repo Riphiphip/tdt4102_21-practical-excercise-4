@@ -79,9 +79,51 @@ void simplify_tree(node_t **simplified, node_t *root)
         *simplified = root->children[0];
         node_finalize(root);
     }
-    else
+    
+    
+    root = *simplified;
+    // Simplify list structures (task 2)
+    if (root->type == GLOBAL_LIST ||
+        root->type == STATEMENT_LIST ||
+        root->type == PRINT_LIST ||
+        root->type == EXPRESSION_LIST ||
+        root->type == VARIABLE_LIST ||
+        root->type == ARGUMENT_LIST ||
+        root->type == PARAMETER_LIST ||
+        root->type == DECLARATION_LIST
+        )
     {
-        *simplified = root;
+        for (int i = 0; i < root->n_children; i++)
+        {
+            // Nested list of the same type
+            if (root->children[i]->type == root->type)
+            {
+                node_t *child = root->children[i];
+                // Attach the nested list's children to this node instead
+                int old_n_children = root->n_children;
+                // We're going to remove the child, so we need to reduce the amount of children by 1
+                root->n_children = old_n_children + child->n_children - 1;
+
+                // A S S I M I L A T E  C H I L D R E N
+                node_t **new_children = calloc(root->n_children, sizeof(node_t *));
+                for (int j = 0; j < child->n_children; j++)
+                {
+                    new_children[j] = child->children[j];
+                }
+                int k = child->n_children;
+                for (int j = 0; j < old_n_children; j++)
+                {
+                    // Don't keep the child we're getting rid of
+                    if (i == j)
+                        continue;
+                    new_children[k++] = root->children[j];
+                }
+                root->children = new_children;
+
+                // K I L L  C H I- no wait
+                free(child);
+            }
+        }
     }
 
     // Update working node
