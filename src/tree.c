@@ -55,6 +55,39 @@ void destroy_subtree(node_t *discard)
     }
 }
 
+// Flattens a node by taking the nth grandchildren as its own children and killing the nth child
+// No breaches of the Geneva convention here, officer, just move along
+void flatten_child(node_t *node, int n)
+{
+    node_t *child = node->children[n];
+    // Attach the nested list's children to this node instead
+    int old_n_children = node->n_children;
+    // We're going to remove the child, so we need to reduce the amount of children by 1
+    node->n_children = old_n_children + child->n_children - 1;
+
+    // A S S I M I L A T E  C H I L D R E N
+    node_t **new_children = calloc(node->n_children, sizeof(node_t *));
+    for (int j = 0; j < child->n_children; j++)
+    {
+        new_children[j] = child->children[j];
+    }
+    int k = child->n_children;
+    for (int j = 0; j < old_n_children; j++)
+    {
+        // Don't keep the child we're getting rid of
+        if (n == j)
+            continue;
+        new_children[k++] = node->children[j];
+    }
+    node->children = new_children;
+
+    // K I L L  C H I- no wait
+    // "F I N A L I Z E"  C H I L D
+    // :)
+    // ;)
+    node_finalize(child);
+}
+
 void simplify_tree(node_t **simplified, node_t *root)
 {
     // Depth first recursion
@@ -77,8 +110,7 @@ void simplify_tree(node_t **simplified, node_t *root)
         *simplified = root->children[0];
         node_finalize(root);
     }
-    
-    
+
     root = *simplified;
     // Simplify list structures (task 2)
     if (root->type == GLOBAL_LIST ||
@@ -96,35 +128,15 @@ void simplify_tree(node_t **simplified, node_t *root)
             // Nested list of the same type
             if (root->children[i]->type == root->type)
             {
-                node_t *child = root->children[i];
-                // Attach the nested list's children to this node instead
-                int old_n_children = root->n_children;
-                // We're going to remove the child, so we need to reduce the amount of children by 1
-                root->n_children = old_n_children + child->n_children - 1;
-
-                // A S S I M I L A T E  C H I L D R E N
-                node_t **new_children = calloc(root->n_children, sizeof(node_t *));
-                for (int j = 0; j < child->n_children; j++)
-                {
-                    new_children[j] = child->children[j];
-                }
-                int k = child->n_children;
-                for (int j = 0; j < old_n_children; j++)
-                {
-                    // Don't keep the child we're getting rid of
-                    if (i == j)
-                        continue;
-                    new_children[k++] = root->children[j];
-                }
-                root->children = new_children;
-
-                // K I L L  C H I- no wait
-                // "F I N A L I Z E"  C H I L D
-                // :)
-                // ;)
-                node_finalize(child);
+                flatten_child(root, i);
             }
         }
+    }
+
+    // Special case: print lists can directly associate their children with the print statement node
+    if (root->type == PRINT_STATEMENT && root->n_children > 0 && root->children[0]->type == PRINT_LIST)
+    {
+        flatten_child(root, 0);
     }
 
     // Update working node
