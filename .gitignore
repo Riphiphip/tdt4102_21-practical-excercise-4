@@ -1,0 +1,6 @@
+**/*.o
+src/scanner.c
+src/parser.c
+src/y.tab.h
+src/vslc
+vsl_programs/*.tree
