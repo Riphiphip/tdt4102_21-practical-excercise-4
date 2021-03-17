@@ -1,6 +1,5 @@
 def main()
 begin
-    var a, b
     a := -1*2
     b := (-1)*2
     c := 2 << 1
