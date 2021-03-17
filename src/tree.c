@@ -79,6 +79,7 @@ void flatten_child(node_t *node, int n)
             continue;
         new_children[k++] = node->children[j];
     }
+    free(node->children);
     node->children = new_children;
 
     // K I L L  C H I- no wait
