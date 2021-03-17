@@ -147,7 +147,7 @@ void simplify_tree(node_t **simplified, node_t *root)
             }
             else if (!strcmp(node.data, ">>"))
             {
-                number_value = *((long *)node.children[0]->data) + *((long *)node.children[1]->data);
+                number_value = param1 >> param2;
             }
             else if (!strcmp(node.data, "~"))
             {
