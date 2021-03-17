@@ -84,4 +84,82 @@ void simplify_tree(node_t **simplified, node_t *root)
 
     // Update working node
     node = **simplified;
+
+    if (node.type == EXPRESSION || node.type == RELATION)
+    {
+        bool is_constant = true;
+        for (int i = 0; i < node.n_children; i++)
+        {
+            if (node.children[i]->type != NUMBER_DATA)
+            {
+                is_constant = false;
+                break;
+            }
+        }
+        if (is_constant)
+        {
+            long number_value;
+            bool is_unary = true;
+
+            long param1 = *((long *)node.children[0]->data);
+            long param2;
+            if (node.n_children > 1)
+            {
+                is_unary = false;
+                param2 = *((long *)node.children[1]->data);
+            }
+
+            if (!strcmp(node.data, "+"))
+            {
+                number_value = param1 + param2;
+            }
+            else if (!strcmp(node.data, "-") && is_unary)
+            {
+                number_value = -param1;
+            }
+            else if (!strcmp(node.data, "-"))
+            {
+                number_value = param1 - param2;
+            }
+            else if (!strcmp(node.data, "*"))
+            {
+                number_value = param1 * param2;
+            }
+            else if (!strcmp(node.data, "/"))
+            {
+                number_value = param1 / param2;
+            }
+            else if (!strcmp(node.data, "|"))
+            {
+                number_value = param1 | param2;
+            }
+            else if (!strcmp(node.data, "^"))
+            {
+                number_value = param1 ^ param2;
+            }
+            else if (!strcmp(node.data, "&"))
+            {
+                number_value = param1 & param2;
+            }
+            else if (!strcmp(node.data, "<<"))
+            {
+                number_value = param1 << param2;
+            }
+            else if (!strcmp(node.data, ">>"))
+            {
+                number_value = *((long *)node.children[0]->data) + *((long *)node.children[1]->data);
+            }
+            else if (!strcmp(node.data, "~"))
+            {
+                number_value = ~param1;
+            }
+            node_t* number_node = malloc(sizeof(node_t));
+            number_node->n_children = 0;
+            number_node->type = NUMBER_DATA;
+            number_node->children = NULL;
+            number_node->data = malloc(sizeof(long));
+            *((long*)number_node->data) = number_value;
+            *simplified = number_node;
+        }
+    }
 }
