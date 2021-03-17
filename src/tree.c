@@ -58,23 +58,23 @@ void destroy_subtree(node_t *discard)
 void simplify_tree(node_t **simplified, node_t *root)
 {
     // Depth first recursion
-    if (root == NULL)
-    {
-        return;
-    }
     node_t node = *root;
     for (int i = 0; i < node.n_children; i++)
     {
-        simplify_tree(&node.children[i], node.children[i]);
+        if (node.children[i] != NULL && node.children[i])
+        {
+            printf("%s\n", node_string[node.children[i]->type]);
+            simplify_tree(&node.children[i], node.children[i]);
+        }
     }
 
     // Remove purely syntactic nodes
-    if (root->data == NULL &&
-        root->n_children == 1 &&
-        root->type != DECLARATION &&
-        root->type != PRINT_STATEMENT &&
-        root->type != RETURN_STATEMENT
-        )
+    if (root->type == NULL_STATEMENT ||
+        (root->data == NULL &&
+         root->n_children == 1 &&
+         root->type != DECLARATION &&
+         root->type != PRINT_STATEMENT &&
+         root->type != RETURN_STATEMENT))
     {
         *simplified = root->children[0];
         node_finalize(root);
