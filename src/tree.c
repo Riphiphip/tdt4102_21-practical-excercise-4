@@ -61,7 +61,7 @@ void simplify_tree(node_t **simplified, node_t *root)
     node_t node = *root;
     for (int i = 0; i < node.n_children; i++)
     {
-        if (node.children[i] != NULL && node.children[i])
+        if (node.children[i] != NULL)
         {
             simplify_tree(&node.children[i], node.children[i]);
         }
