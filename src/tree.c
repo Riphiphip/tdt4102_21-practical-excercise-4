@@ -121,7 +121,10 @@ void simplify_tree(node_t **simplified, node_t *root)
                 root->children = new_children;
 
                 // K I L L  C H I- no wait
-                free(child);
+                // "F I N A L I Z E"  C H I L D
+                // :)
+                // ;)
+                node_finalize(child);
             }
         }
     }
